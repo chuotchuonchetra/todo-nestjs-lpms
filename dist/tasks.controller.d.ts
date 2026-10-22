@@ -13,4 +13,17 @@ export declare class TasksController {
         title: string;
         done: boolean;
     }[];
+    findDone(): {
+        id: number;
+        title: string;
+        done: boolean;
+    }[];
+    whoIsAsking(agent: string): {
+        userAgent: string;
+    };
+    findOne(id: string): {
+        id: number;
+        title: string;
+        done: boolean;
+    } | undefined;
 }

@@ -7,7 +7,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { Controller, Get } from '@nestjs/common';
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+import { Controller, Get, Param } from '@nestjs/common';
+import { UserAgent } from './common/user-agent.decorator.js';
 let TasksController = class TasksController {
     tasks = [
         { id: 1, title: 'Install Node.js and VS Code', done: true },
@@ -26,6 +30,15 @@ let TasksController = class TasksController {
     }
     findTodo() {
         return this.tasks.filter((task) => task.done === false);
+    }
+    findDone() {
+        return this.tasks.filter((task) => task.done === true);
+    }
+    whoIsAsking(agent) {
+        return { userAgent: agent };
+    }
+    findOne(id) {
+        return this.tasks.find((task) => task.id === Number(id));
     }
 };
 __decorate([
@@ -46,6 +59,26 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], TasksController.prototype, "findTodo", null);
+__decorate([
+    Get('done'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], TasksController.prototype, "findDone", null);
+__decorate([
+    Get('agent'),
+    __param(0, UserAgent()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], TasksController.prototype, "whoIsAsking", null);
+__decorate([
+    Get(':id'),
+    __param(0, Param('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], TasksController.prototype, "findOne", null);
 TasksController = __decorate([
     Controller('tasks')
 ], TasksController);

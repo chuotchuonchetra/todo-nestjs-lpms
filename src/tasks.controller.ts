@@ -1,4 +1,5 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
+import { UserAgent } from './common/user-agent.decorator.js';
 
 @Controller('tasks')
 export class TasksController {
@@ -25,5 +26,20 @@ export class TasksController {
   @Get('todo')
   findTodo() {
     return this.tasks.filter((task) => task.done === false);
+  }
+
+  @Get('done')
+  findDone() {
+    return this.tasks.filter((task) => task.done === true);
+  }
+
+  @Get('agent')
+  whoIsAsking(@UserAgent() agent: string) {
+    return { userAgent: agent };
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.tasks.find((task) => task.id === Number(id));
   }
 }
