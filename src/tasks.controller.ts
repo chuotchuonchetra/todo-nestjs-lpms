@@ -1,19 +1,19 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { UserAgent } from './common/user-agent.decorator.js';
+import { TasksService } from './tasks.service.js';
 
 @Controller('tasks')
 export class TasksController {
-  private readonly tasks = [
-    { id: 1, title: 'Install Node.js and VS Code', done: true },
-    { id: 2, title: 'Create the mytasks Nest project', done: true },
-    { id: 3, title: 'Build the TasksController', done: true },
-    { id: 4, title: 'Finish the bootcamp assignment', done: false },
-    { id: 5, title: 'Push the project to GitHub', done: false },
-  ];
+  constructor(private readonly tasksService: TasksService) {}
 
   @Get()
   findAll() {
-    return this.tasks;
+    return this.tasksService.findAll();
+  }
+
+  @Post()
+  create(@Body('title') title: string) {
+    return this.tasksService.create(title);
   }
 
   @Get('welcome')
@@ -25,12 +25,12 @@ export class TasksController {
 
   @Get('todo')
   findTodo() {
-    return this.tasks.filter((task) => task.done === false);
+    return this.tasksService.findTodo();
   }
 
   @Get('done')
   findDone() {
-    return this.tasks.filter((task) => task.done === true);
+    return this.tasksService.findDone();
   }
 
   @Get('agent')
@@ -40,6 +40,16 @@ export class TasksController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.tasks.find((task) => task.id === Number(id));
+    return this.tasksService.findOne(Number(id));
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body('done') done: boolean) {
+    return this.tasksService.update(Number(id), done);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.tasksService.remove(Number(id));
   }
 }

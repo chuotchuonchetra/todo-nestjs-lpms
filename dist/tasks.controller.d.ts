@@ -1,10 +1,17 @@
+import { TasksService } from './tasks.service.js';
 export declare class TasksController {
-    private readonly tasks;
+    private readonly tasksService;
+    constructor(tasksService: TasksService);
     findAll(): {
         id: number;
         title: string;
         done: boolean;
     }[];
+    create(title: string): {
+        id: number;
+        title: string;
+        done: boolean;
+    };
     getWelcome(): {
         message: string;
     };
@@ -25,5 +32,13 @@ export declare class TasksController {
         id: number;
         title: string;
         done: boolean;
+    } | undefined;
+    update(id: string, done: boolean): {
+        id: number;
+        title: string;
+        done: boolean;
+    } | undefined;
+    remove(id: string): {
+        message: string;
     } | undefined;
 }

@@ -10,18 +10,19 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { UserAgent } from './common/user-agent.decorator.js';
+import { TasksService } from './tasks.service.js';
 let TasksController = class TasksController {
-    tasks = [
-        { id: 1, title: 'Install Node.js and VS Code', done: true },
-        { id: 2, title: 'Create the mytasks Nest project', done: true },
-        { id: 3, title: 'Build the TasksController', done: true },
-        { id: 4, title: 'Finish the bootcamp assignment', done: false },
-        { id: 5, title: 'Push the project to GitHub', done: false },
-    ];
+    tasksService;
+    constructor(tasksService) {
+        this.tasksService = tasksService;
+    }
     findAll() {
-        return this.tasks;
+        return this.tasksService.findAll();
+    }
+    create(title) {
+        return this.tasksService.create(title);
     }
     getWelcome() {
         return {
@@ -29,16 +30,22 @@ let TasksController = class TasksController {
         };
     }
     findTodo() {
-        return this.tasks.filter((task) => task.done === false);
+        return this.tasksService.findTodo();
     }
     findDone() {
-        return this.tasks.filter((task) => task.done === true);
+        return this.tasksService.findDone();
     }
     whoIsAsking(agent) {
         return { userAgent: agent };
     }
     findOne(id) {
-        return this.tasks.find((task) => task.id === Number(id));
+        return this.tasksService.findOne(Number(id));
+    }
+    update(id, done) {
+        return this.tasksService.update(Number(id), done);
+    }
+    remove(id) {
+        return this.tasksService.remove(Number(id));
     }
 };
 __decorate([
@@ -47,6 +54,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], TasksController.prototype, "findAll", null);
+__decorate([
+    Post(),
+    __param(0, Body('title')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], TasksController.prototype, "create", null);
 __decorate([
     Get('welcome'),
     __metadata("design:type", Function),
@@ -79,8 +93,24 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], TasksController.prototype, "findOne", null);
+__decorate([
+    Patch(':id'),
+    __param(0, Param('id')),
+    __param(1, Body('done')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Boolean]),
+    __metadata("design:returntype", void 0)
+], TasksController.prototype, "update", null);
+__decorate([
+    Delete(':id'),
+    __param(0, Param('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], TasksController.prototype, "remove", null);
 TasksController = __decorate([
-    Controller('tasks')
+    Controller('tasks'),
+    __metadata("design:paramtypes", [TasksService])
 ], TasksController);
 export { TasksController };
 //# sourceMappingURL=tasks.controller.js.map

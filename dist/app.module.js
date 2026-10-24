@@ -8,13 +8,14 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { TasksController } from './tasks.controller.js';
+import { TasksService } from './tasks.service.js';
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
     Module({
         imports: [],
         controllers: [AppController, TasksController],
-        providers: [AppService],
+        providers: [AppService, TasksService],
     })
 ], AppModule);
 export { AppModule };
