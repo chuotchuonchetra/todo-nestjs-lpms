@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { UserAgent } from './common/user-agent.decorator.js';
 import { TasksService } from './tasks.service.js';
 
@@ -38,9 +47,19 @@ export class TasksController {
     return { userAgent: agent };
   }
 
+  // @Get(':id')
+  // async findOne(@Param('id') id: string) {
+  //   const task = await this.tasksService.findOne(Number(id));
+  //   return task;
+  // }
+
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tasksService.findOne(Number(id));
+  async getOneTask(@Param('id', ParseIntPipe) id: number) {
+    const taskPromise = await this.tasksService.findOne(id);
+
+    console.log(taskPromise);
+
+    return taskPromise;
   }
 
   @Patch(':id')

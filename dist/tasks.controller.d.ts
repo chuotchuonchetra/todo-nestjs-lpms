@@ -2,16 +2,16 @@ import { TasksService } from './tasks.service.js';
 export declare class TasksController {
     private readonly tasksService;
     constructor(tasksService: TasksService);
-    findAll(): {
+    findAll(): Promise<{
         id: number;
         title: string;
         done: boolean;
-    }[];
-    create(title: string): {
+    }[]>;
+    create(title: string): Promise<{
         id: number;
         title: string;
         done: boolean;
-    };
+    }>;
     getWelcome(): {
         message: string;
     };
@@ -28,17 +28,17 @@ export declare class TasksController {
     whoIsAsking(agent: string): {
         userAgent: string;
     };
-    findOne(id: string): {
+    getOneTask(id: number): Promise<{
         id: number;
         title: string;
         done: boolean;
-    } | undefined;
-    update(id: string, done: boolean): {
+    } | undefined>;
+    update(id: string, done: boolean): Promise<{
         id: number;
         title: string;
         done: boolean;
-    } | undefined;
-    remove(id: string): {
+    } | undefined>;
+    remove(id: string): Promise<{
         message: string;
-    } | undefined;
+    } | undefined>;
 }

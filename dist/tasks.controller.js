@@ -10,7 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, } from '@nestjs/common';
 import { UserAgent } from './common/user-agent.decorator.js';
 import { TasksService } from './tasks.service.js';
 let TasksController = class TasksController {
@@ -38,8 +38,10 @@ let TasksController = class TasksController {
     whoIsAsking(agent) {
         return { userAgent: agent };
     }
-    findOne(id) {
-        return this.tasksService.findOne(Number(id));
+    async getOneTask(id) {
+        const taskPromise = await this.tasksService.findOne(id);
+        console.log(taskPromise);
+        return taskPromise;
     }
     update(id, done) {
         return this.tasksService.update(Number(id), done);
@@ -88,11 +90,11 @@ __decorate([
 ], TasksController.prototype, "whoIsAsking", null);
 __decorate([
     Get(':id'),
-    __param(0, Param('id')),
+    __param(0, Param('id', ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], TasksController.prototype, "findOne", null);
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], TasksController.prototype, "getOneTask", null);
 __decorate([
     Patch(':id'),
     __param(0, Param('id')),

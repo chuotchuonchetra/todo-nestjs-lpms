@@ -5,6 +5,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 import { Injectable } from '@nestjs/common';
+function fakeDatabaseDelay(ms = 500) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 let TasksService = class TasksService {
     tasks = [
         { id: 1, title: 'Install Node.js and VS Code', done: true },
@@ -14,12 +17,14 @@ let TasksService = class TasksService {
         { id: 5, title: 'Push the project to GitHub', done: false },
     ];
     nextId = 6;
-    create(title) {
+    async create(title) {
+        await fakeDatabaseDelay();
         const task = { id: this.nextId++, title, done: false };
         this.tasks.push(task);
         return task;
     }
-    findAll() {
+    async findAll() {
+        await fakeDatabaseDelay();
         return this.tasks;
     }
     findTodo() {
@@ -28,17 +33,20 @@ let TasksService = class TasksService {
     findDone() {
         return this.tasks.filter((task) => task.done === true);
     }
-    findOne(id) {
+    async findOne(id) {
+        await fakeDatabaseDelay();
         return this.tasks.find((task) => task.id === id);
     }
-    update(id, done) {
-        const task = this.findOne(id);
+    async update(id, done) {
+        await fakeDatabaseDelay();
+        const task = await this.findOne(id);
         if (task) {
             task.done = done;
         }
         return task;
     }
-    remove(id) {
+    async remove(id) {
+        await fakeDatabaseDelay();
         const index = this.tasks.findIndex((task) => task.id === id);
         if (index === -1) {
             return undefined;

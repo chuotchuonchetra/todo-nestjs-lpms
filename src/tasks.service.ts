@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
+function fakeDatabaseDelay(ms = 500): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 @Injectable()
 export class TasksService {
   private readonly tasks = [
@@ -12,13 +16,15 @@ export class TasksService {
 
   private nextId = 6;
 
-  create(title: string) {
+  async create(title: string) {
+    await fakeDatabaseDelay();
     const task = { id: this.nextId++, title, done: false };
     this.tasks.push(task);
     return task;
   }
 
-  findAll() {
+  async findAll() {
+    await fakeDatabaseDelay();
     return this.tasks;
   }
 
@@ -30,19 +36,22 @@ export class TasksService {
     return this.tasks.filter((task) => task.done === true);
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
+    await fakeDatabaseDelay();
     return this.tasks.find((task) => task.id === id);
   }
 
-  update(id: number, done: boolean) {
-    const task = this.findOne(id);
+  async update(id: number, done: boolean) {
+    await fakeDatabaseDelay();
+    const task = await this.findOne(id);
     if (task) {
       task.done = done;
     }
     return task;
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    await fakeDatabaseDelay();
     const index = this.tasks.findIndex((task) => task.id === id);
     if (index === -1) {
       return undefined;
