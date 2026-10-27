@@ -1,36 +1,14 @@
+import { Repository } from 'typeorm';
+import { Task } from './task.entity.js';
 export declare class TasksService {
-    private readonly tasks;
-    private nextId;
-    create(title: string): Promise<{
-        id: number;
-        title: string;
-        done: boolean;
-    }>;
-    findAll(): Promise<{
-        id: number;
-        title: string;
-        done: boolean;
-    }[]>;
-    findTodo(): {
-        id: number;
-        title: string;
-        done: boolean;
-    }[];
-    findDone(): {
-        id: number;
-        title: string;
-        done: boolean;
-    }[];
-    findOne(id: number): Promise<{
-        id: number;
-        title: string;
-        done: boolean;
-    } | undefined>;
-    update(id: number, done: boolean): Promise<{
-        id: number;
-        title: string;
-        done: boolean;
-    } | undefined>;
+    private readonly tasksRepository;
+    constructor(tasksRepository: Repository<Task>);
+    create(title: string): Promise<Task>;
+    findAll(): Promise<Task[]>;
+    findTodo(): Promise<Task[]>;
+    findDone(): Promise<Task[]>;
+    findOne(id: number): Promise<Task | undefined>;
+    update(id: number, done: boolean): Promise<Task | undefined>;
     remove(id: number): Promise<{
         message: string;
     } | undefined>;

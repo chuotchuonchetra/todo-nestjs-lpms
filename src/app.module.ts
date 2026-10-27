@@ -1,12 +1,44 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module, OnModuleInit } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
+import { Task } from './task.entity.js';
 import { TasksController } from './tasks.controller.js';
 import { TasksService } from './tasks.service.js';
 
 @Module({
-  imports: [],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres',
+        host: config.get<string>('DB_HOST'),
+        port: config.get<number>('DB_PORT'),
+        username: config.get<string>('DB_USERNAME'),
+        password: config.get<string>('DB_PASSWORD'),
+        database: config.get<string>('DB_NAME'),
+        autoLoadEntities: true,
+        synchronize: true,
+      }),
+    }),
+    TypeOrmModule.forFeature([Task]),
+  ],
   controllers: [AppController, TasksController],
   providers: [AppService, TasksService],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  private readonly logger = new Logger('Database');
+
+  constructor(private readonly dataSource: DataSource) {}
+
+  onModuleInit() {
+    if (this.dataSource.isInitialized) {
+      this.logger.log(
+        `Connected to database "${this.dataSource.options.database}" successfully`,
+      );
+    }
+  }
+}

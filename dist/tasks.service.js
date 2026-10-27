@@ -4,61 +4,66 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 import { Injectable } from '@nestjs/common';
-function fakeDatabaseDelay(ms = 500) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Task } from './task.entity.js';
 let TasksService = class TasksService {
-    tasks = [
-        { id: 1, title: 'Install Node.js and VS Code', done: true },
-        { id: 2, title: 'Create the mytasks Nest project', done: true },
-        { id: 3, title: 'Build the TasksController', done: true },
-        { id: 4, title: 'Finish the bootcamp assignment', done: false },
-        { id: 5, title: 'Push the project to GitHub', done: false },
-    ];
-    nextId = 6;
+    tasksRepository;
+    constructor(tasksRepository) {
+        this.tasksRepository = tasksRepository;
+    }
     async create(title) {
-        await fakeDatabaseDelay();
-        const task = { id: this.nextId++, title, done: false };
-        this.tasks.push(task);
-        return task;
+        const task = this.tasksRepository.create({ title });
+        return this.tasksRepository.save(task);
     }
     async findAll() {
-        await fakeDatabaseDelay();
-        return this.tasks;
+        return this.tasksRepository.find({ order: { id: 'ASC' } });
     }
-    findTodo() {
-        return this.tasks.filter((task) => task.done === false);
+    async findTodo() {
+        return this.tasksRepository.find({
+            where: { done: false },
+            order: { id: 'ASC' },
+        });
     }
-    findDone() {
-        return this.tasks.filter((task) => task.done === true);
+    async findDone() {
+        return this.tasksRepository.find({
+            where: { done: true },
+            order: { id: 'ASC' },
+        });
     }
     async findOne(id) {
-        await fakeDatabaseDelay();
-        return this.tasks.find((task) => task.id === id);
+        return (await this.tasksRepository.findOneBy({ id })) ?? undefined;
     }
     async update(id, done) {
-        await fakeDatabaseDelay();
         const task = await this.findOne(id);
-        if (task) {
-            task.done = done;
-        }
-        return task;
-    }
-    async remove(id) {
-        await fakeDatabaseDelay();
-        const index = this.tasks.findIndex((task) => task.id === id);
-        if (index === -1) {
+        if (!task) {
             return undefined;
         }
-        const [removed] = this.tasks.splice(index, 1);
+        task.done = done;
+        return this.tasksRepository.save(task);
+    }
+    async remove(id) {
+        const task = await this.findOne(id);
+        if (!task) {
+            return undefined;
+        }
+        await this.tasksRepository.remove(task);
         return {
-            message: `Task ${removed.id} removed successfully`,
+            message: `Task ${id} removed successfully`,
         };
     }
 };
 TasksService = __decorate([
-    Injectable()
+    Injectable(),
+    __param(0, InjectRepository(Task)),
+    __metadata("design:paramtypes", [Repository])
 ], TasksService);
 export { TasksService };
 //# sourceMappingURL=tasks.service.js.map

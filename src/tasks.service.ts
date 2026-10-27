@@ -1,64 +1,59 @@
 import { Injectable } from '@nestjs/common';
-
-function fakeDatabaseDelay(ms = 500): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Task } from './task.entity.js';
 
 @Injectable()
 export class TasksService {
-  private readonly tasks = [
-    { id: 1, title: 'Install Node.js and VS Code', done: true },
-    { id: 2, title: 'Create the mytasks Nest project', done: true },
-    { id: 3, title: 'Build the TasksController', done: true },
-    { id: 4, title: 'Finish the bootcamp assignment', done: false },
-    { id: 5, title: 'Push the project to GitHub', done: false },
-  ];
-
-  private nextId = 6;
+  constructor(
+    @InjectRepository(Task)
+    private readonly tasksRepository: Repository<Task>,
+  ) {}
 
   async create(title: string) {
-    await fakeDatabaseDelay();
-    const task = { id: this.nextId++, title, done: false };
-    this.tasks.push(task);
-    return task;
+    const task = this.tasksRepository.create({ title });
+    return this.tasksRepository.save(task);
   }
 
   async findAll() {
-    await fakeDatabaseDelay();
-    return this.tasks;
+    return this.tasksRepository.find({ order: { id: 'ASC' } });
   }
 
-  findTodo() {
-    return this.tasks.filter((task) => task.done === false);
+  async findTodo() {
+    return this.tasksRepository.find({
+      where: { done: false },
+      order: { id: 'ASC' },
+    });
   }
 
-  findDone() {
-    return this.tasks.filter((task) => task.done === true);
+  async findDone() {
+    return this.tasksRepository.find({
+      where: { done: true },
+      order: { id: 'ASC' },
+    });
   }
 
   async findOne(id: number) {
-    await fakeDatabaseDelay();
-    return this.tasks.find((task) => task.id === id);
+    return (await this.tasksRepository.findOneBy({ id })) ?? undefined;
   }
 
   async update(id: number, done: boolean) {
-    await fakeDatabaseDelay();
     const task = await this.findOne(id);
-    if (task) {
-      task.done = done;
+    if (!task) {
+      return undefined;
     }
-    return task;
+    task.done = done;
+    return this.tasksRepository.save(task);
   }
 
   async remove(id: number) {
-    await fakeDatabaseDelay();
-    const index = this.tasks.findIndex((task) => task.id === id);
-    if (index === -1) {
+    const task = await this.findOne(id);
+    if (!task) {
       return undefined;
     }
-    const [removed] = this.tasks.splice(index, 1);
+    await this.tasksRepository.remove(task);
     return {
-      message: `Task ${removed.id} removed successfully`,
+      message: `Task ${id} removed successfully`,
     };
   }
 }
