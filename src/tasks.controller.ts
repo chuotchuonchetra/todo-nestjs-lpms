@@ -9,6 +9,8 @@ import {
   Post,
 } from '@nestjs/common';
 import { UserAgent } from './common/user-agent.decorator.js';
+import { CreateTaskDto } from './tasks/dto/create-task.dto.js';
+import { UpdateTaskDto } from './tasks/dto/update-task.dto.js';
 import { TasksService } from './tasks.service.js';
 
 @Controller('tasks')
@@ -21,8 +23,8 @@ export class TasksController {
   }
 
   @Post()
-  create(@Body('title') title: string) {
-    return this.tasksService.create(title);
+  create(@Body() createTaskDto: CreateTaskDto) {
+    return this.tasksService.create(createTaskDto.title);
   }
 
   @Get('welcome')
@@ -63,12 +65,15 @@ export class TasksController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body('done') done: boolean) {
-    return this.tasksService.update(Number(id), done);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateTaskDto: UpdateTaskDto,
+  ) {
+    return this.tasksService.update(id, updateTaskDto.done);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tasksService.remove(Number(id));
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.tasksService.remove(id);
   }
 }
