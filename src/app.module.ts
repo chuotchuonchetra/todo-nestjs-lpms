@@ -1,12 +1,16 @@
 import { Logger, Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
+import { AuthController } from './auth/auth.controller.js';
+import { AuthService } from './auth/auth.service.js';
 import { Task } from './task.entity.js';
 import { TasksController } from './tasks.controller.js';
 import { TasksService } from './tasks.service.js';
+import { User } from './users/user.entity.js';
 
 @Module({
   imports: [
@@ -24,10 +28,19 @@ import { TasksService } from './tasks.service.js';
         synchronize: false,
       }),
     }),
-    TypeOrmModule.forFeature([Task]),
+    TypeOrmModule.forFeature([Task, User]),
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.getOrThrow<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: config.get('JWT_EXPIRES_IN') ?? '1h',
+        },
+      }),
+    }),
   ],
-  controllers: [AppController, TasksController],
-  providers: [AppService, TasksService],
+  controllers: [AppController, TasksController, AuthController],
+  providers: [AppService, TasksService, AuthService],
 })
 export class AppModule implements OnModuleInit {
   private readonly logger = new Logger('Database');
