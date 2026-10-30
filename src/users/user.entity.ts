@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('users')
@@ -8,7 +9,8 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  // bcrypt hash, never the plain password
+  // bcrypt hash, never the plain password. @Exclude() keeps it out of every response.
+  @Exclude()
   @Column()
-  password: string;
+  passwordHash: string;
 }

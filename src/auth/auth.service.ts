@@ -35,12 +35,15 @@ export class AuthService {
 
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
     const user = await this.usersRepository.save(
-      this.usersRepository.create({ email: normalizedEmail, password: hash }),
+      this.usersRepository.create({
+        email: normalizedEmail,
+        passwordHash: hash,
+      }),
     );
     this.logger.log(`User ${user.id} registered`);
 
-    // Never return the password or its hash
-    return { id: user.id, email: user.email };
+    // passwordHash is stripped by @Exclude() and ClassSerializerInterceptor
+    return user;
   }
 
   async login({ email, password }: LoginDto) {
@@ -48,7 +51,7 @@ export class AuthService {
       email: email.toLowerCase(),
     });
     // Same message for unknown email and wrong password, so emails can't be probed
-    const valid = user && (await bcrypt.compare(password, user.password));
+    const valid = user && (await bcrypt.compare(password, user.passwordHash));
     if (!user || !valid) {
       this.logger.warn('Failed login attempt');
       throw new UnauthorizedException('Invalid email or password');
