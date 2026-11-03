@@ -1,3 +1,4 @@
+import { BullModule } from '@nestjs/bullmq';
 import { Logger, Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -12,6 +13,7 @@ import { Task } from './task.entity.js';
 import { TasksController } from './tasks.controller.js';
 import { TaskNotificationsListener } from './tasks/task-notifications.listener.js';
 import { TaskStatsListener } from './tasks/task-stats.listener.js';
+import { TasksProcessor } from './tasks/tasks.processor.js';
 import { TasksService } from './tasks.service.js';
 import { User } from './users/user.entity.js';
 
@@ -19,6 +21,16 @@ import { User } from './users/user.entity.js';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     EventEmitterModule.forRoot(),
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: {
+          host: config.get<string>('REDIS_HOST', 'localhost'),
+          port: Number(config.get('REDIS_PORT', 6379)),
+        },
+      }),
+    }),
+    BullModule.registerQueue({ name: 'tasks' }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -50,6 +62,7 @@ import { User } from './users/user.entity.js';
     AuthService,
     TaskNotificationsListener,
     TaskStatsListener,
+    TasksProcessor,
   ],
 })
 export class AppModule implements OnModuleInit {
