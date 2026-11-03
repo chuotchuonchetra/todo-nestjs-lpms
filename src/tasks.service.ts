@@ -1,7 +1,11 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Task } from './task.entity.js';
+import { UpdateTaskDto } from './tasks/dto/update-task.dto.js';
+import { TaskCreatedEvent } from './tasks/task-created.event.js';
+import { TaskUpdatedEvent } from './tasks/task-updated.event.js';
 
 @Injectable()
 export class TasksService {
@@ -10,13 +14,17 @@ export class TasksService {
   constructor(
     @InjectRepository(Task)
     private readonly tasksRepository: Repository<Task>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(title: string) {
     const task = this.tasksRepository.create({ title });
     const saved = await this.tasksRepository.save(task);
     this.logger.debug(`New task title: "${title}"`);
-    this.logger.log(`Task ${saved.id} created`);
+    this.eventEmitter.emit(
+      'task.created',
+      new TaskCreatedEvent(saved.id, saved.title),
+    );
     return saved;
   }
 
@@ -47,11 +55,18 @@ export class TasksService {
     return task;
   }
 
-  async update(id: number, done: boolean) {
+  async update(id: number, changes: UpdateTaskDto) {
     const task = await this.findOne(id);
-    task.done = done;
+    // DTO fields that weren't sent are present as undefined; skip them
+    const sent = Object.fromEntries(
+      Object.entries(changes).filter(([, value]) => value !== undefined),
+    );
+    Object.assign(task, sent);
     const saved = await this.tasksRepository.save(task);
-    this.logger.log(`Task ${id} updated (done=${done})`);
+    this.eventEmitter.emit(
+      'task.updated',
+      new TaskUpdatedEvent(saved.id, saved.title, saved.done),
+    );
     return saved;
   }
 

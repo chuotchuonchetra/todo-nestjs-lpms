@@ -1,5 +1,6 @@
 import { Logger, Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -9,12 +10,15 @@ import { AuthController } from './auth/auth.controller.js';
 import { AuthService } from './auth/auth.service.js';
 import { Task } from './task.entity.js';
 import { TasksController } from './tasks.controller.js';
+import { TaskNotificationsListener } from './tasks/task-notifications.listener.js';
+import { TaskStatsListener } from './tasks/task-stats.listener.js';
 import { TasksService } from './tasks.service.js';
 import { User } from './users/user.entity.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    EventEmitterModule.forRoot(),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -40,7 +44,13 @@ import { User } from './users/user.entity.js';
     }),
   ],
   controllers: [AppController, TasksController, AuthController],
-  providers: [AppService, TasksService, AuthService],
+  providers: [
+    AppService,
+    TasksService,
+    AuthService,
+    TaskNotificationsListener,
+    TaskStatsListener,
+  ],
 })
 export class AppModule implements OnModuleInit {
   private readonly logger = new Logger('Database');

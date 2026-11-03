@@ -14,7 +14,7 @@ async function bootstrap() {
     : ['log', 'warn', 'error', 'debug'];
 
   const app = await NestFactory.create(AppModule, { logger: logLevels });
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useGlobalInterceptors(
     new LoggingInterceptor(),
     new ClassSerializerInterceptor(app.get(Reflector)),
