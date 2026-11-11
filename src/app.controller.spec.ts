@@ -15,8 +15,11 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('should return the welcome message', () => {
+      expect(appController.getHello()).toMatchObject({
+        message: 'Welcome to MyTasks, Dara!',
+        taskCount: 3,
+      });
     });
   });
 });

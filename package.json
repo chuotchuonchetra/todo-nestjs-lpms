@@ -23,7 +23,8 @@
     "typeorm": "npm run build && typeorm -d dist/data-source.js",
     "migration:generate": "npm run typeorm -- migration:generate",
     "migration:run": "npm run typeorm -- migration:run",
-    "migration:revert": "npm run typeorm -- migration:revert"
+    "migration:revert": "npm run typeorm -- migration:revert",
+    "migration:run:test": "npm run build && node --env-file=.env.test node_modules/typeorm/cli.js -d dist/data-source.js migration:run"
   },
   "dependencies": {
     "@nestjs/bullmq": "^12.0.0",
